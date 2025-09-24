@@ -1,14 +1,18 @@
 pipeline {
     agent any
+
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'git@github.com:benedikt-wiesner-bl/ci-app.git'
+                git branch: 'main',
+                    credentialsId: 'github-ci-key',
+                    url: 'git@github.com:benedikt-wiesner-bl/ci-app.git'
             }
         }
-        stage('Hello') {
+
+        stage('Echo') {
             steps {
-                echo "Jenkins hat das Repo erfolgreich ausgecheckt!"
+                echo '🚀 Jenkins CI läuft!'
             }
         }
     }
