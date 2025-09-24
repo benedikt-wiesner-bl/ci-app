@@ -40,9 +40,10 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus   # ✅ Prometheus-Daten persistent speichern
+      - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
     restart: unless-stopped
+
 
   grafana:
     image: grafana/grafana:latest
