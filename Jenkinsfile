@@ -5,6 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
+                    credentialsId: 'github-ssh',
                     url: 'git@github.com:benedikt-wiesner-bl/ci-app.git'
             }
         }
@@ -29,7 +30,7 @@ pipeline {
 
         stage('Run Container') {
             steps {
-                sh 'docker run -d -p 5000:5000 --name ci-app ci-app:latest'
+                sh 'docker run -d -p 5000:5000 --name ci-app ci-app:latest || true'
             }
         }
     }
@@ -37,12 +38,6 @@ pipeline {
     post {
         always {
             sh 'docker ps -a'
-        }
-        failure {
-            echo "Pipeline failed ❌"
-        }
-        success {
-            echo "Pipeline succeeded ✅"
         }
     }
 }
