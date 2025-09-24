@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_COMPOSE = "docker compose"
+        DOCKER_COMPOSE = "docker-compose"
     }
 
     stages {
@@ -41,7 +41,6 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline beendet."
             sh 'docker ps -a'
         }
         success {
