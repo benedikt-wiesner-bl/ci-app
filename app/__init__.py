@@ -136,5 +136,3 @@ def delete_todo_api(todo_id):
     conn.commit()
     conn.close()
     return jsonify(message="Deleted"), 200
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
