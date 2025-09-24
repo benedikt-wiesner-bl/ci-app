@@ -1,7 +1,11 @@
 import sqlite3
 from flask import Flask, jsonify, request, render_template, redirect, url_for
+import os
 
 app = Flask(__name__)
+
+# Datenbank liegt in eigenem Ordner
+os.makedirs("data", exist_ok=True)
 DB_FILE = "data/todos.db"
 
 
@@ -17,11 +21,6 @@ def init_db():
                     task TEXT NOT NULL,
                     done BOOLEAN NOT NULL DEFAULT 0
                 )""")
-    # Falls leer → Dummy-Todos einfügen
-    c.execute("SELECT COUNT(*) FROM todos")
-    if c.fetchone()[0] == 0:
-        c.execute("INSERT INTO todos (task, done) VALUES ('Task 1', 0)")
-        c.execute("INSERT INTO todos (task, done) VALUES ('Task 2', 1)")
     conn.commit()
     conn.close()
 
@@ -121,7 +120,6 @@ def update_todo(todo_id):
     if row is None:
         conn.close()
         return jsonify(error="Not Found"), 404
-    # Fallback auf alten Wert
     new_task = data.get("task", row[1])
     new_done = int(data.get("done", row[2]))
     c.execute("UPDATE todos SET task=?, done=? WHERE id=?", (new_task, new_done, todo_id))
@@ -138,7 +136,3 @@ def delete_todo_api(todo_id):
     conn.commit()
     conn.close()
     return jsonify(message="Deleted"), 200
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
