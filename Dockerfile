@@ -11,6 +11,6 @@ COPY . .
 
 # Damit "import app" funktioniert
 ENV PYTHONPATH=/app
-
+RUN mkdir -p /app/data
 EXPOSE 5000
 CMD ["python", "-m", "app"]
