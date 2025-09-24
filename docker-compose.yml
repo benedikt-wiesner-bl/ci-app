@@ -1,15 +1,6 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    container_name: todo-app
-    ports:
-      - "5000:5000"
-    volumes:
-      - todo_data:/app/todos.db   # <-- DB bleibt bestehen
-    restart: unless-stopped
-
   jenkins:
     build:
       context: .
@@ -26,6 +17,15 @@ services:
       - ./jenkins_ssh/id_ed25519_ci.pub:/var/jenkins_home/.ssh/id_ed25519_ci.pub:ro
       - ./jenkins_ssh/config:/var/jenkins_home/.ssh/config:ro
       - ./jenkins_ssh/known_hosts:/var/jenkins_home/.ssh/known_hosts:ro
+    restart: unless-stopped
+
+  ci-app:
+    build: .
+    container_name: ci-app
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data   # SQLite persistent speichern
     restart: unless-stopped
 
   cadvisor:
@@ -58,4 +58,3 @@ services:
 
 volumes:
   jenkins_home:
-  todo_data:

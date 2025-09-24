@@ -2,7 +2,7 @@ import sqlite3
 from flask import Flask, jsonify, request, render_template, redirect, url_for
 
 app = Flask(__name__)
-DB_FILE = "todos.db"
+DB_FILE = "data/todos.db"
 
 
 def get_connection():
