@@ -50,12 +50,17 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana        # Grafana DB persistent
-      - ./grafana/provisioning:/etc/grafana/provisioning   # optional: auto config
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
 
 
+
+
+
 volumes:
-  jenkins_home:
-  prometheus_data:
   grafana_data:
+  prometheus_data:
+  jenkins_home:
+
