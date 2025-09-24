@@ -1,6 +1,10 @@
 import sqlite3
 import pytest
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
 from app import app, DB_FILE
+
 
 @pytest.fixture(autouse=True)
 def setup_db():
