@@ -9,18 +9,12 @@ services:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      # Jenkins Daten
-      - jenkins_home:/var/jenkins_home
-
-      # Docker-Socket, damit Jenkins Docker-Befehle vom Host nutzen kann
+      - jenkins_home:/var/jenkins_home   # <── hier werden Jobs, Plugins, Config gespeichert
       - /var/run/docker.sock:/var/run/docker.sock
-
-      # SSH Keys & Config
       - /root/.ssh/id_ed25519_ci:/var/jenkins_home/.ssh/id_ed25519_ci:ro
       - /root/.ssh/id_ed25519_ci.pub:/var/jenkins_home/.ssh/id_ed25519_ci.pub:ro
       - /root/.ssh/config:/var/jenkins_home/.ssh/config:ro
       - /root/.ssh/known_hosts:/var/jenkins_home/.ssh/known_hosts:ro
-
     restart: unless-stopped
 
 volumes:
