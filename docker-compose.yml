@@ -15,6 +15,7 @@ services:
       - /root/.ssh/id_ed25519_ci.pub:/var/jenkins_home/.ssh/id_ed25519_ci.pub:ro
       - /root/.ssh/config:/var/jenkins_home/.ssh/config:ro
       - /root/.ssh/known_hosts:/var/jenkins_home/.ssh/known_hosts:ro
+
     restart: unless-stopped
 
 volumes:
