@@ -1,9 +1,12 @@
+
 jenkins_ssh/
 *.pem
 *.key
 id_*
-jenkins_ssh/
-volumes/backups/
-volumes/
-*.tar.gz
+
 backups/
+*.tar.gz
+
+volumes/
+grafana/
+data/
