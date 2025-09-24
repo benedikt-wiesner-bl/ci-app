@@ -11,6 +11,9 @@ COPY . .
 
 # Damit "import app" funktioniert
 ENV PYTHONPATH=/app
+ENV FLASK_APP=app
+
 RUN mkdir -p /app/data
 EXPOSE 5000
-CMD ["python", "-m", "app"]
+CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=5000"]
+
