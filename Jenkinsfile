@@ -29,14 +29,15 @@ pipeline {
         stage('Deploy (Full Reset)') {
             steps {
                 sh '''
-                  # Stoppe und entferne alten Stack
-                  ${DOCKER_COMPOSE} down
+                docker-compose stop ci-app grafana prometheus cadvisor
+                docker-compose rm -f ci-app grafana prometheus cadvisor
 
-                  # Baue und starte alles frisch
-                  ${DOCKER_COMPOSE} up -d --build
+                docker-compose build ci-app grafana prometheus cadvisor
+                docker-compose up -d ci-app grafana prometheus cadvisor
                 '''
             }
         }
+
     }
 
     post {
