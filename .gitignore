@@ -4,3 +4,4 @@ jenkins_ssh/
 id_*
 jenkins_ssh/
 volumes/backups/
+*.tar.gz
