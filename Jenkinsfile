@@ -29,11 +29,11 @@ pipeline {
         stage('Deploy (Full Reset)') {
             steps {
                 sh '''
-                docker-compose stop ci-app grafana prometheus cadvisor
-                docker-compose rm -f ci-app grafana prometheus cadvisor
+                    docker-compose stop ci-app || true
+                    docker-compose rm -f ci-app || true
+                    docker-compose build ci-app
+                    docker-compose up -d ci-app
 
-                docker-compose build ci-app grafana prometheus cadvisor
-                docker-compose up -d ci-app grafana prometheus cadvisor
                 '''
             }
         }

@@ -40,7 +40,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ${PWD}/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     restart: unless-stopped
 
@@ -55,6 +55,7 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
+
 
 
 
