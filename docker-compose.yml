@@ -9,7 +9,7 @@ services:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - ./volumes/jenkins:/var/jenkins_home   # ✅ persistent im Projektordner
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.ssh:/root/.ssh:ro
     restart: unless-stopped
@@ -41,9 +41,8 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus_data:/prometheus
+      - ./volumes/prometheus:/prometheus   # ✅ persistent im Projektordner
     restart: unless-stopped
-
 
   grafana:
     image: grafana/grafana:latest
@@ -51,18 +50,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ./volumes/grafana:/var/lib/grafana   # ✅ persistent im Projektordner
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
-
-
-
-
-
-
-volumes:
-  grafana_data:
-  prometheus_data:
-  jenkins_home:
-
