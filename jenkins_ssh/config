@@ -1,0 +1,4 @@
+Host github.com
+  User git
+  IdentityFile /var/jenkins_home/.ssh/id_ed25519_ci
+  StrictHostKeyChecking yes
