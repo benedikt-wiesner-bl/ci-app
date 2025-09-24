@@ -3,4 +3,4 @@ jenkins_ssh/
 *.key
 id_*
 jenkins_ssh/
-volumes/
+volumes/backups/
