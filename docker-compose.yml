@@ -9,7 +9,7 @@ services:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      - ./volumes/jenkins:/var/jenkins_home   # ✅ persistent im Projektordner
+      - ./volumes/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.ssh:/root/.ssh:ro
     restart: unless-stopped
@@ -19,7 +19,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./data:/app/data   # SQLite persistent speichern
+      - ./data:/app/data
     restart: unless-stopped
 
   cadvisor:
@@ -41,7 +41,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./volumes/prometheus:/prometheus   # ✅ persistent im Projektordner
+      - ./volumes/prometheus:/prometheus
     restart: unless-stopped
 
   grafana:
@@ -50,7 +50,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./volumes/grafana:/var/lib/grafana   # ✅ persistent im Projektordner
+      - ./volumes/grafana:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning
       - ./grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped

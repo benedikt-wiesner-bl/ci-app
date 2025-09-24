@@ -1,8 +1,6 @@
 FROM jenkins/jenkins:lts
 
 USER root
-
-# Install Docker CLI, Git und SSH
 RUN apt-get update && \
     apt-get install -y \
       docker.io \

@@ -5,7 +5,6 @@ from app import app, DB_FILE
 
 @pytest.fixture(autouse=True)
 def clear_db():
-    """Vor und nach jedem Test DB leeren."""
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute("DELETE FROM todos")

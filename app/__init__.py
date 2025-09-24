@@ -4,7 +4,6 @@ import os
 
 app = Flask(__name__)
 
-# Datenbank liegt in eigenem Ordner
 os.makedirs("data", exist_ok=True)
 DB_FILE = "data/todos.db"
 
@@ -25,7 +24,6 @@ def init_db():
     conn.close()
 
 
-# --- Call init_db on startup ---
 init_db()
 
 
