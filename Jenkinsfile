@@ -5,7 +5,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    credentialsId: 'github-ssh',
+                    credentialsId: 'github-ci-key',
                     url: 'git@github.com:benedikt-wiesner-bl/ci-app.git'
             }
         }
