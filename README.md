@@ -8,10 +8,12 @@ Alles läuft über `Docker` und `docker compose` auf deinem lokalen Rechner.
 ## Features
 
 - **CI/CD mit Jenkins**  
-  Nutze Jenkins mit einem `Jenkinsfile`, um deine App automatisch zu bauen, zu testen und zu deployen.  
+  Nutze Jenkins mit einem `Jenkinsfile`, um deine App automatisch zu bauen, zu testen und **Blue-Green-Deployments** durchzuführen.  
 
 - **Python ToDo-App**  
-  Kleine Flask-Anwendung mit SQLite als Beispielprojekt, erreichbar unter `http://localhost:5001`.  
+  Kleine Flask-Anwendung mit SQLite als Beispielprojekt.  
+  - Läuft intern als zwei Container (`ci-app-blue` und `ci-app-green`)  
+  - Jenkins schaltet via Nginx zwischen beiden Versionen um → **Zero-Downtime-Deployment**  
 
 - **Monitoring & Logging**  
   - `Prometheus` sammelt Metriken  
@@ -26,7 +28,7 @@ Alles läuft über `Docker` und `docker compose` auf deinem lokalen Rechner.
   Alles in `docker-compose.yml` definiert, mit persistenten Volumes für Jenkins, Grafana und Prometheus.  
 
 - **UI-Komfort**  
-  Deine ToDo-App enthält unten im Footer Links zu allen Services → kein Portsuchen mehr.  
+  Deine ToDo-App enthält im Footer Links zu allen Services → kein Portsuchen mehr.  
 
 ---
 
@@ -50,7 +52,7 @@ cd ci-app
 2. **Services starten**
 
 ```bash
-docker compose up --build -d
+docker compose -f config/docker-compose.yml up --build -d
 ```
 
 Das baut die Images und startet alle Services im Hintergrund.  
@@ -58,7 +60,7 @@ Beim ersten Start kann Jenkins ein paar Minuten brauchen.
 
 3. **Services im Browser aufrufen**
 
-- **ToDo-App** → [http://localhost:5001](http://localhost:5001)  
+- **ToDo-App (immer via Nginx)** → [http://localhost:8085](http://localhost:8085)  
 - **Jenkins** → [http://localhost:8080](http://localhost:8080)  
   - Initiales Admin-Password:  
     ```bash
@@ -72,7 +74,7 @@ Beim ersten Start kann Jenkins ein paar Minuten brauchen.
 
 ---
 
-## CI/CD mit Security Scan
+## CI/CD mit Blue-Green & Security Scan
 
 Dein `Jenkinsfile` enthält mehrere Stages:  
 
@@ -83,20 +85,12 @@ Dein `Jenkinsfile` enthält mehrere Stages:
    Führt Unit-Tests (z. B. mit `pytest`) durch.  
 
 3. **Security Scan (Trivy)**  
-   Scannt das gebaute Docker-Image und deine Dependencies auf Schwachstellen:  
+   Scannt das gebaute Docker-Image und deine Dependencies auf Schwachstellen.  
 
-   ```groovy
-   stage('Security Scan') {
-       steps {
-           sh 'trivy image ci-app:latest || true'
-       }
-   }
-   ```
-
-   Reports kannst du in Jenkins archivieren und auswerten.  
-
-4. **Deploy**  
-   Startet/aktualisiert deine App und die Umgebung via `docker compose up -d`.  
+4. **Deploy (Blue-Green)**  
+   - Jenkins deployt die neue Version in einen inaktiven Container (`blue` oder `green`).  
+   - Führt einen Healthcheck (`/health`) durch.  
+   - Schaltet Nginx auf die neue Version um → die alte Version bleibt für Rollback verfügbar.  
 
 ---
 
@@ -110,7 +104,7 @@ pip install -r requirements.txt
 python __init__.py
 ```
 
-→ dann läuft sie auf [http://localhost:5001](http://localhost:5001)  
+→ dann läuft sie auf [http://localhost:5000](http://localhost:5000) (nur lokal, ohne Nginx).  
 
 ---
 
@@ -121,9 +115,7 @@ ci-app/
 │── app/                # Flask ToDo-App
 │── infrastructure/      # Dockerfiles für Jenkins und App
 │── grafana/             # Provisioning & Dashboards           
-│── docker-compose.yml   # Alle Services
+│── config/              # docker-compose.yml + nginx
 │── prometheus.yml       # Prometheus-Konfiguration
 │── README.md
 ```
-
----
