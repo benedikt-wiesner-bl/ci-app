@@ -64,7 +64,6 @@ pipeline {
                         returnStdout: true
                     ).trim()
                     def target = (current == "ci-app-blue") ? "ci-app-green" : "ci-app-blue"
-                    def targetPort = (target == "ci-app-blue") ? "5001" : "5002"
 
                     echo "🔵 Aktuell: ${current}, 🟢 Ziel: ${target}"
 
@@ -76,25 +75,23 @@ pipeline {
                         $DOCKER_COMPOSE up -d ${target}
                     """
 
-                    // Healthcheck mit Retry (max 30s)
+                    // Healthcheck über den Service-Namen im Compose-Netzwerk
                     sh """
                     echo '⏳ Warte 5s bevor der Healthcheck startet...'
                     sleep 5
                     for i in \$(seq 1 15); do
-                    if curl --silent --fail http://localhost:${targetPort}/health; then
+                      if docker exec nginx curl --silent --fail http://${target}:5000/health; then
                         echo '✅ Healthcheck erfolgreich!'
                         exit 0
-                    fi
-                    echo "⏳ Versuch \$i fehlgeschlagen, retry in 3s..."
-                    sleep 3
+                      fi
+                      echo "⏳ Versuch \$i fehlgeschlagen, retry in 3s..."
+                      sleep 3
                     done
                     echo '❌ Healthcheck fehlgeschlagen!'
                     echo '--- Logs von ${target} ---'
                     docker logs ${target} || true
                     exit 1
-"""
-
-
+                    """
 
                     // Umschalten in Nginx
                     sh "sed -i 's/${current}/${target}/' config/nginx/default.conf"
