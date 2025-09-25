@@ -31,7 +31,6 @@ pipeline {
 
         stage('Security Scan with Trivy') {
             steps {
-                // Table-Ausgabe im Log
                 sh '''
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -43,7 +42,6 @@ pipeline {
                 $IMAGE_NAME
                 '''
 
-                // JSON-Report ins Workspace schreiben
                 sh '''
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
