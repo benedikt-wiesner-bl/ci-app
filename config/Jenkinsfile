@@ -31,7 +31,7 @@ pipeline {
 
         stage('Security Scan with Trivy') {
             steps {
-                sh '''
+                sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
@@ -40,8 +40,9 @@ pipeline {
                 --severity HIGH,CRITICAL \
                 --format table \
                 $IMAGE_NAME
-                '''
+                """
 
+                sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
@@ -49,9 +50,10 @@ pipeline {
                 --format json \
                 --output /workspace/trivy-report.json \
                 $IMAGE_NAME
-                '''
+                """
             }
         }
+
 
         stage('Deploy New Version (Blue ↔ Green)') {
             steps {
