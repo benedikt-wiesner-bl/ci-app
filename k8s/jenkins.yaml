@@ -23,6 +23,13 @@ spec:
               memory: "2Gi"
             requests:
               memory: "512Mi"
+          volumeMounts:
+            - name: jenkins-home
+              mountPath: /var/jenkins_home
+      volumes:
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins-pvc
 ---
 apiVersion: v1
 kind: Service

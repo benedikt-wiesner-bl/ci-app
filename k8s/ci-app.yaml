@@ -15,12 +15,19 @@ spec:
       containers:
         - name: ci-app
           image: ci-app:latest
-          imagePullPolicy: Never   # weil du lokal baust
+          imagePullPolicy: Never   # nutzt dein lokal gebautes Image
           ports:
             - containerPort: 5000
           resources:
             limits:
               memory: "512Mi"
+          volumeMounts:
+            - name: ci-app-data
+              mountPath: /app/data
+      volumes:
+        - name: ci-app-data
+          persistentVolumeClaim:
+            claimName: ci-app-pvc
 ---
 apiVersion: v1
 kind: Service
