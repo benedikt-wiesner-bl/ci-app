@@ -1,17 +1,17 @@
-# ci-app 🚀
+# ci-app
 
 A robust CI/CD pipeline and application deployment environment, powered by Jenkins, Docker, and integrated monitoring.
 
-## ✨ Features
+## Features
 
-*   **Automated CI/CD Pipeline**: ⚙️ Leverage `Jenkins` and `Jenkinsfile` for continuous integration and continuous deployment, ensuring rapid and reliable software delivery.
-*   **Containerized Environment**: 🐳 Deploy and manage all services, including the application, Jenkins, Prometheus, and Grafana, using `Docker` and `docker-compose.yml` for consistency and isolation.
-*   **Integrated Monitoring**: 📊 Gain deep insights into your application and infrastructure performance with `Prometheus` for metrics collection and `Grafana` for powerful visualization dashboards.
-*   **Python Application Backend**: 🐍 A modular Python application (`app/`) ready for development, testing, and deployment within the CI/CD ecosystem.
-*   **Comprehensive Testing**: ✅ Includes a dedicated `tests/` directory to ensure code quality and functionality throughout the development lifecycle.
+*   **Automated CI/CD Pipeline**: Leverage `Jenkins` and `Jenkinsfile` for continuous integration and continuous deployment, ensuring rapid and reliable software delivery.
+*   **Containerized Environment**: Deploy and manage all services, including the application, Jenkins, Prometheus, and Grafana, using `Docker` and `docker-compose.yml` for consistency and isolation.
+*   **Integrated Monitoring**: Gain deep insights into your application and infrastructure performance with `Prometheus` for metrics collection and `Grafana` for powerful visualization dashboards.
+*   **Python Application Backend**: A modular Python application (`app/`) ready for development, testing, and deployment within the CI/CD ecosystem.
+*   **Comprehensive Testing**: Includes a dedicated `tests/` directory to ensure code quality and functionality throughout the development lifecycle.
 
 
-## 🚀 Installation Guide
+## Installation Guide
 
 Follow these steps to get `ci-app` up and running on your local machine.
 
@@ -61,7 +61,7 @@ Before you begin, ensure you have the following installed:
     *   Once Jenkins is set up, you can create a new pipeline job and point it to the `Jenkinsfile` in your repository. This will automatically set up your CI/CD pipeline.
 
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Running the Python Application Locally (outside Docker)
 
