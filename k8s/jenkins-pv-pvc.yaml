@@ -8,7 +8,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/c/U/benedikt.wiesner/OneDrive - Brainlab AG/Documents/Docker/ci-app/volumes/jenkins"
+    path: "/volumes/jenkins"   # <- gemountet von deinem lokalen volumes/ Ordner
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
