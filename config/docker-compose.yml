@@ -1,25 +1,27 @@
 services:
   jenkins:
     build:
-      context: .
-      dockerfile: Dockerfile.jenkins
+      context: ..
+      dockerfile: infra/Dockerfile.jenkins
     container_name: jenkins
     user: root
     ports:
       - "8080:8080"
       - "50000:50000"
     volumes:
-      - ./volumes/jenkins:/var/jenkins_home
+      - ../volumes/jenkins:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
       - /root/.ssh:/root/.ssh:ro
     restart: unless-stopped
 
   ci-app:
-    build: .
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
     ports:
       - "5001:5000"
     volumes:
-      - ./data:/app/data
+      - ../data:/app/data
     restart: unless-stopped
 
   cadvisor:
@@ -41,7 +43,7 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./volumes/prometheus:/prometheus
+      - ../volumes/prometheus:/prometheus
     restart: unless-stopped
 
   grafana:
@@ -50,7 +52,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./volumes/grafana:/var/lib/grafana
-      - ./grafana/provisioning:/etc/grafana/provisioning
-      - ./grafana/dashboards:/var/lib/grafana/dashboards
+      - ../volumes/grafana:/var/lib/grafana
+      - ../grafana/provisioning:/etc/grafana/provisioning
+      - ../grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
