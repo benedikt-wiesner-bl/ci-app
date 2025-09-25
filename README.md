@@ -2,8 +2,6 @@
 
 A robust CI/CD pipeline and application deployment environment, powered by Jenkins, Docker, and integrated monitoring.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue) ![License](https://img.shields.io/badge/license-None-lightgrey) ![Stars](https://img.shields.io/github/stars/benedikt-wiesner-bl/ci-app?style=social) ![Forks](https://img.shields.io/github/forks/benedikt-wiesner-bl/ci-app?style=social)
-
 ## ✨ Features
 
 *   **Automated CI/CD Pipeline**: ⚙️ Leverage `Jenkins` and `Jenkinsfile` for continuous integration and continuous deployment, ensuring rapid and reliable software delivery.
