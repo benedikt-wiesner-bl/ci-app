@@ -120,17 +120,10 @@ python __init__.py
 ci-app/
 │── app/                # Flask ToDo-App
 │── infrastructure/      # Dockerfiles für Jenkins und App
-│── grafana/             # Provisioning & Dashboards
-│── volumes/             # Persistente Daten für Jenkins, Grafana, Prometheus
+│── grafana/             # Provisioning & Dashboards           
 │── docker-compose.yml   # Alle Services
 │── prometheus.yml       # Prometheus-Konfiguration
 │── README.md
 ```
 
 ---
-
-## Nächste Schritte
-
-- Grafana-Dashboards für Jenkins- und App-Metriken anlegen  
-- Backups für Volumes per Cronjob automatisieren  
-- Optional: Lokale Docker Registry hinzufügen  
