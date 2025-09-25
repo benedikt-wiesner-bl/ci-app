@@ -1,7 +1,7 @@
 pipeline {
     agent any
     options {
-        skipDefaultCheckout(true)
+        skipDefaultCheckout(true) // verhindert doppeltes Checkout
     }
 
     environment {
@@ -20,9 +20,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                dir("${env.WORKSPACE}") {
-                    sh 'docker build -t $IMAGE_NAME -f infrastructure/Dockerfile .'
-                }
+                sh 'docker build -t $IMAGE_NAME -f infrastructure/Dockerfile .'
             }
         }
 
@@ -60,17 +58,17 @@ pipeline {
         stage('Deploy New Version (Blue ↔ Green)') {
             steps {
                 script {
-                    // herausfinden, welche Version gerade aktiv ist
+                    // aktuelle Version aus Nginx-Config ermitteln
                     def current = sh(
                         script: "grep -o 'ci-app-[a-z]*' config/nginx/default.conf | head -n1",
                         returnStdout: true
                     ).trim()
-
                     def target = (current == "ci-app-blue") ? "ci-app-green" : "ci-app-blue"
+                    def targetPort = (target == "ci-app-blue") ? "5001" : "5002"
 
-                    echo "Aktuell aktiv: ${current}, neue Version: ${target}"
+                    echo "🔵 Aktuell: ${current}, 🟢 Ziel: ${target}"
 
-                    // alte Target-Version stoppen & entfernen, falls vorhanden
+                    // alte Target-Version stoppen & entfernen
                     sh """
                         $DOCKER_COMPOSE stop ${target} || true
                         $DOCKER_COMPOSE rm -f ${target} || true
@@ -78,16 +76,26 @@ pipeline {
                         $DOCKER_COMPOSE up -d ${target}
                     """
 
-                    // Healthcheck auf neuer Version
-                    def targetPort = (target == "ci-app-blue") ? "5001" : "5002"
-                    sh "echo 'Warte auf Healthcheck von ${target} ...'"
-                    sh "for i in {1..10}; do curl --fail http://localhost:${targetPort}/health && exit 0 || sleep 3; done; exit 1"
+                    // Healthcheck mit Retry (max 30s)
+                    sh """
+                    echo 'Warte auf Healthcheck von ${target} (Port ${targetPort})...'
+                    for i in {1..10}; do
+                        if curl --silent --fail http://localhost:${targetPort}/health; then
+                            echo '✅ Healthcheck erfolgreich!'
+                            exit 0
+                        fi
+                        echo "⏳ Versuch \$i fehlgeschlagen, retry in 3s..."
+                        sleep 3
+                    done
+                    echo '❌ Healthcheck fehlgeschlagen!'
+                    exit 1
+                    """
 
                     // Umschalten in Nginx
                     sh "sed -i 's/${current}/${target}/' config/nginx/default.conf"
                     sh "$DOCKER_COMPOSE exec -T nginx nginx -s reload"
 
-                    echo "Umschaltung von ${current} auf ${target} erfolgreich!"
+                    echo "🔀 Umschaltung von ${current} → ${target} erfolgreich!"
                 }
             }
         }
@@ -95,8 +103,8 @@ pipeline {
         stage('Cleanup Old (optional)') {
             steps {
                 script {
-                    echo "Alte Version bleibt erstmal aktiv für Rollback."
-                    // Falls du sie direkt killen willst:
+                    echo "🧹 Alte Version bleibt erstmal aktiv für Rollback."
+                    // Falls du sie sofort entfernen willst:
                     // sh "$DOCKER_COMPOSE stop ${current} || true"
                     // sh "$DOCKER_COMPOSE rm -f ${current} || true"
                 }
