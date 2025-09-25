@@ -53,41 +53,46 @@ pipeline {
             }
         }
 
-        stage('Deploy Green Version') {
-            steps {
-                sh '''
-                    # baue und starte Green neu
-                    $DOCKER_COMPOSE build ci-app-green
-                    $DOCKER_COMPOSE up -d ci-app-green
-                '''
-            }
-        }
-
-        stage('Healthcheck Green') {
+        stage('Deploy New Version (Blue ↔ Green)') {
             steps {
                 script {
-                    // einfache Prüfung ob Green App antwortet
-                    sh 'curl --fail http://localhost:5002/health || exit 1'
-                }
-            }
-        }
+                    // herausfinden, welche Version gerade aktiv ist
+                    def current = sh(
+                        script: "grep -o 'ci-app-[a-z]*' config/nginx/default.conf | head -n1",
+                        returnStdout: true
+                    ).trim()
 
-        stage('Blue-Green Switch') {
-            steps {
-                script {
-                    // Nginx Config von Blue auf Green umschalten
-                    sh "sed -i 's/ci-app-blue/ci-app-green/' config/nginx/default.conf"
+                    def target = (current == "ci-app-blue") ? "ci-app-green" : "ci-app-blue"
+
+                    echo "Aktuell aktiv: ${current}, neue Version: ${target}"
+
+                    // build & start neue Version
+                    sh """
+                        $DOCKER_COMPOSE build ${target}
+                        $DOCKER_COMPOSE up -d ${target}
+                    """
+
+                    // Healthcheck auf neuer Version
+                    def targetPort = (target == "ci-app-blue") ? "5001" : "5002"
+                    sh "echo 'Warte auf Healthcheck von ${target} ...'"
+                    sh "for i in {1..10}; do curl --fail http://localhost:${targetPort}/health && exit 0 || sleep 3; done; exit 1"
+
+                    // Umschalten in Nginx
+                    sh "sed -i 's/${current}/${target}/' config/nginx/default.conf"
                     sh "$DOCKER_COMPOSE exec -T nginx nginx -s reload"
+
+                    echo "Umschaltung von ${current} auf ${target} erfolgreich!"
                 }
             }
         }
 
         stage('Cleanup Old (optional)') {
             steps {
-                sh '''
-                    # Stoppe alte Blue-Version, wenn Green erfolgreich läuft
-                    $DOCKER_COMPOSE stop ci-app-blue || true
-                '''
+                script {
+                    echo "Alte Version bleibt erstmal aktiv für Rollback."
+                    // Wenn du willst: hier explizit stoppen
+                    // sh "$DOCKER_COMPOSE stop ${current} || true"
+                }
             }
         }
     }
