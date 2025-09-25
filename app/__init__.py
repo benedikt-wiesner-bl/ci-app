@@ -4,9 +4,11 @@ from flask import Flask, jsonify, request, render_template, redirect, url_for
 
 
 app = Flask(__name__)
-
-os.makedirs("data", exist_ok=True)
-DB_FILE = "data/todos.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_FILE = os.path.join(BASE_DIR, "..", "data", "todos.db")
+os.makedirs(os.path.dirname(DB_FILE), exist_ok=True)
+#os.makedirs("data", exist_ok=True)
+#DB_FILE = "data/todos.db"
 
 
 def get_connection():
