@@ -57,17 +57,3 @@ services:
       - ../grafana/provisioning:/etc/grafana/provisioning
       - ../grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
-
-  sonarqube:
-    image: sonarqube:community
-    container_name: sonarqube
-    ports:
-      - "9000:9000"
-    environment:
-      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
-      - SONARQUBE_JAVA_OPTS=-Xmx2g -Xms1g
-    deploy:
-      resources:
-        limits:
-          memory: 4g
-    restart: unless-stopped
