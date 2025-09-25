@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+cd "$(dirname "$0")/.."
+
 echo "Erstelle ein neues Todo über die API..."
 curl -s -X POST http://localhost:5001/todos \
      -H "Content-Type: application/json" \
