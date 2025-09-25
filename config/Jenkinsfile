@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         DOCKER_COMPOSE = "docker-compose -f config/docker-compose.yml"
+        IMAGE_NAME = "ci-app:latest"
     }
 
     stages {
@@ -17,14 +18,41 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 dir("${env.WORKSPACE}") {
-                    sh 'docker build -t ci-app:latest -f infrastructure/Dockerfile .'
+                    sh 'docker build -t $IMAGE_NAME -f infrastructure/Dockerfile .'
                 }
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh 'docker run --rm ci-app:latest pytest -q'
+                sh 'docker run --rm $IMAGE_NAME pytest -q'
+            }
+        }
+
+        stage('Security Scan with Trivy') {
+            steps {
+                // Bricht ab, wenn HIGH/CRITICAL CVEs gefunden werden
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v $WORKSPACE:/workspace \
+                  aquasec/trivy:latest image \
+                  --exit-code 1 \
+                  --severity HIGH,CRITICAL \
+                  --format table \
+                  $IMAGE_NAME
+                '''
+
+                // Zusätzlich JSON-Report speichern
+                sh '''
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v $WORKSPACE:/workspace \
+                  aquasec/trivy:latest image \
+                  --format json \
+                  --output trivy-report.json \
+                  $IMAGE_NAME
+                '''
             }
         }
 
@@ -44,6 +72,7 @@ pipeline {
     post {
         always {
             sh 'docker ps -a'
+            archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
         }
         success {
             echo "✅ Deployment erfolgreich!"
