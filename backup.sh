@@ -17,4 +17,4 @@ tar -czvf $BACKUP_DIR/full-backup-volumes-data-$TIMESTAMP.tar.gz \
   requirements.txt
 
 PARENT_BACKUP="../project-full-backup-$TIMESTAMP.tar.gz"
-tar -czvf "$PARENT_BACKUP"
+tar -czvf "$PARENT_BACKUP" .
