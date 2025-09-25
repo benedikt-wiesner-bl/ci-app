@@ -26,7 +26,7 @@ pipeline {
             }
         }
 
-        stage('Deploy (Full Reset)') {
+        stage('Deploy (only ci-app)') {
             steps {
                 sh '''
                     docker-compose stop ci-app || true
