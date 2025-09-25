@@ -31,30 +31,31 @@ pipeline {
 
         stage('Security Scan with Trivy') {
             steps {
-                // Bricht ab, wenn HIGH/CRITICAL CVEs gefunden werden
+                // Table-Ausgabe im Log
                 sh '''
                 docker run --rm \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  -v $WORKSPACE:/workspace \
-                  aquasec/trivy:latest image \
-                  --exit-code 1 \
-                  --severity HIGH,CRITICAL \
-                  --format table \
-                  $IMAGE_NAME
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v $WORKSPACE:/workspace \
+                aquasec/trivy:latest image \
+                --exit-code 1 \
+                --severity HIGH,CRITICAL \
+                --format table \
+                $IMAGE_NAME
                 '''
 
-                // Zusätzlich JSON-Report speichern
+                // JSON-Report ins Workspace schreiben
                 sh '''
                 docker run --rm \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  -v $WORKSPACE:/workspace \
-                  aquasec/trivy:latest image \
-                  --format json \
-                  --output trivy-report.json \
-                  $IMAGE_NAME
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v $WORKSPACE:/workspace \
+                aquasec/trivy:latest image \
+                --format json \
+                --output /workspace/trivy-report.json \
+                $IMAGE_NAME
                 '''
             }
         }
+
 
         stage('Deploy (only ci-app)') {
             steps {
@@ -69,16 +70,17 @@ pipeline {
         }
     }
 
-    post {
-        always {
-            sh 'docker ps -a'
-            archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true
+        post {
+            always {
+                sh 'docker ps -a'
+                archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true, allowEmptyArchive: true
+            }
+            success {
+                echo "✅ Deployment erfolgreich!"
+            }
+            failure {
+                echo "❌ Deployment fehlgeschlagen!"
+            }
         }
-        success {
-            echo "✅ Deployment erfolgreich!"
-        }
-        failure {
-            echo "❌ Deployment fehlgeschlagen!"
-        }
-    }
+
 }
