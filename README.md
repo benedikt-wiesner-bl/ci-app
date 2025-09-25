@@ -1,94 +1,136 @@
 # ci-app
 
-A robust CI/CD pipeline and application deployment environment, powered by Jenkins, Docker, and integrated monitoring.
+Ein leichtgewichtiges **CI/CD- und Monitoring-Lab** mit Jenkins, einer ToDo-App (Python/Flask), Prometheus, Grafana, cAdvisor, Dozzle – und integriertem **Security-Scanning mit Trivy**.  
+Alles läuft über `Docker` und `docker compose` auf deinem lokalen Rechner.  
+
+---
 
 ## Features
 
-*   **Automated CI/CD Pipeline**: Leverage `Jenkins` and `Jenkinsfile` for continuous integration and continuous deployment, ensuring rapid and reliable software delivery.
-*   **Containerized Environment**: Deploy and manage all services, including the application, Jenkins, Prometheus, and Grafana, using `Docker` and `docker-compose.yml` for consistency and isolation.
-*   **Integrated Monitoring**: Gain deep insights into your application and infrastructure performance with `Prometheus` for metrics collection and `Grafana` for powerful visualization dashboards.
-*   **Python Application Backend**: A modular Python application (`app/`) ready for development, testing, and deployment within the CI/CD ecosystem.
-*   **Comprehensive Testing**: Includes a dedicated `tests/` directory to ensure code quality and functionality throughout the development lifecycle.
+- **CI/CD mit Jenkins**  
+  Nutze Jenkins mit einem `Jenkinsfile`, um deine App automatisch zu bauen, zu testen und zu deployen.  
 
+- **Python ToDo-App**  
+  Kleine Flask-Anwendung mit SQLite als Beispielprojekt, erreichbar unter `http://localhost:5001`.  
 
-## Installation Guide
+- **Monitoring & Logging**  
+  - `Prometheus` sammelt Metriken  
+  - `Grafana` visualisiert Dashboards  
+  - `cAdvisor` zeigt Container-Ressourcen  
+  - `Dozzle` stellt Logs aller Container im Browser dar  
 
-Follow these steps to get `ci-app` up and running on your local machine.
+- **Security Scanning**  
+  Jenkins-Pipelines führen mit **Trivy** Container- und Dependency-Scans durch, um bekannte Schwachstellen zu identifizieren.  
 
-### Prerequisites
+- **Einheitliche Umgebung**  
+  Alles in `docker-compose.yml` definiert, mit persistenten Volumes für Jenkins, Grafana und Prometheus.  
 
-Before you begin, ensure you have the following installed:
+- **UI-Komfort**  
+  Deine ToDo-App enthält unten im Footer Links zu allen Services → kein Portsuchen mehr.  
 
-*   [Git](https://git-scm.com/)
-*   [Docker](https://docs.docker.com/get-docker/)
-*   [Docker Compose](https://docs.docker.com/compose/install/) (usually comes with Docker Desktop)
+---
 
-### Step-by-Step Setup
+## Installation & Setup
 
-1.  **Clone the Repository**
-    Start by cloning the `ci-app` repository to your local machine:
+### Voraussetzungen
 
+- [Git](https://git-scm.com/)  
+- [Docker](https://docs.docker.com/get-docker/)  
+- [Docker Compose](https://docs.docker.com/compose/) (ist bei Docker Desktop dabei)  
+
+### Schritte
+
+1. **Repository klonen**
+
+```bash
+git clone https://github.com/benedikt-wiesner-bl/ci-app.git
+cd ci-app
+```
+
+2. **Services starten**
+
+```bash
+docker compose up --build -d
+```
+
+Das baut die Images und startet alle Services im Hintergrund.  
+Beim ersten Start kann Jenkins ein paar Minuten brauchen.  
+
+3. **Services im Browser aufrufen**
+
+- **ToDo-App** → [http://localhost:5001](http://localhost:5001)  
+- **Jenkins** → [http://localhost:8080](http://localhost:8080)  
+  - Initiales Admin-Password:  
     ```bash
-    git clone https://github.com/benedikt-wiesner-bl/ci-app.git
-    cd ci-app
+    docker logs jenkins | grep "initialAdminPassword"
     ```
+- **Grafana** → [http://localhost:3000](http://localhost:3000)  
+  - Login: `admin` / `admin` (beim ersten Mal Passwort ändern)  
+- **Prometheus** → [http://localhost:9090](http://localhost:9090)  
+- **cAdvisor** → [http://localhost:8081](http://localhost:8081)  
+- **Dozzle (Logs)** → [http://localhost:9999](http://localhost:9999)  
 
-2.  **Build and Start Services with Docker Compose**
-    The `docker-compose.yml` file defines all the necessary services, including Jenkins, Prometheus, Grafana, and the Python application.
+---
 
-    ```bash
-    docker-compose up --build -d
-    ```
-    This command will:
-    *   Build the Docker images for your services (including the Python app).
-    *   Start all services in detached mode (`-d`).
-    *   It might take a few minutes for all services, especially Jenkins, to fully initialize.
+## CI/CD mit Security Scan
 
-3.  **Access Services**
-    Once the services are running, you can access them via your web browser:
-    *   **Jenkins**: `http://localhost:8080`
-        *   You'll need to retrieve the initial admin password from the Jenkins container logs:
-            ```bash
-            docker logs jenkins-master | grep "initialAdminPassword"
-            ```
-            Follow the Jenkins setup wizard to install recommended plugins and create your first admin user.
-    *   **Grafana**: `http://localhost:3000`
-        *   Default login: `admin`/`admin` (you'll be prompted to change it).
-    *   **Prometheus**: `http://localhost:9090`
-    *   **Python Application**: `http://localhost:5001` (or as configured in `app/`)
+Dein `Jenkinsfile` enthält mehrere Stages:  
 
-4.  **Configure Jenkins (Optional but Recommended)**
-    *   Once Jenkins is set up, you can create a new pipeline job and point it to the `Jenkinsfile` in your repository. This will automatically set up your CI/CD pipeline.
+1. **Build**  
+   Baut die Python ToDo-App als Docker-Image.  
 
+2. **Test**  
+   Führt Unit-Tests (z. B. mit `pytest`) durch.  
 
-## Usage Examples
+3. **Security Scan (Trivy)**  
+   Scannt das gebaute Docker-Image und deine Dependencies auf Schwachstellen:  
 
-### Running the Python Application Locally (outside Docker)
+   ```groovy
+   stage('Security Scan') {
+       steps {
+           sh 'trivy image ci-app:latest || true'
+       }
+   }
+   ```
 
-While the application is designed to run within Docker, you can run it locally for development purposes.
+   Reports kannst du in Jenkins archivieren und auswerten.  
 
-1.  **Install Dependencies**
-    ```bash
-    pip install -r requirements.txt
-    ```
+4. **Deploy**  
+   Startet/aktualisiert deine App und die Umgebung via `docker compose up -d`.  
 
-2.  **Run the Application**
-    ```bash
-    python app/__init__.py # Or your main application entry point
-    ```
-    The application should then be accessible at `http://localhost:5001` (or its configured port).
+---
 
-### Triggering a Jenkins Pipeline
+## Lokale Entwicklung der App
 
-1.  Navigate to your Jenkins dashboard (`http://localhost:8080`).
-2.  If you've set up a pipeline job for `ci-app`, click on it.
-3.  Click "Build Now" to manually trigger a build of your CI/CD pipeline.
+Die App ist für Docker gedacht, kann aber auch lokal laufen:
 
-### Viewing Monitoring Dashboards in Grafana
+```bash
+cd app
+pip install -r requirements.txt
+python __init__.py
+```
 
-1.  Access Grafana at `http://localhost:3000`.
-2.  Log in with `admin`/`admin` (and change password).
-3.  Explore the pre-configured Prometheus data source.
-4.  Import or create new dashboards to visualize metrics from your application and Jenkins.
+→ dann läuft sie auf [http://localhost:5001](http://localhost:5001)  
 
+---
 
+## Ordnerstruktur
+
+```
+ci-app/
+│── app/                # Flask ToDo-App
+│── infrastructure/      # Dockerfiles für Jenkins und App
+│── grafana/             # Provisioning & Dashboards
+│── volumes/             # Persistente Daten für Jenkins, Grafana, Prometheus
+│── docker-compose.yml   # Alle Services
+│── prometheus.yml       # Prometheus-Konfiguration
+│── README.md
+```
+
+---
+
+## Nächste Schritte
+
+- Grafana-Dashboards für Jenkins- und App-Metriken anlegen  
+- Backups für Volumes per Cronjob automatisieren  
+- Optional: Lokale Docker Registry hinzufügen  
