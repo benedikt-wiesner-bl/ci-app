@@ -16,7 +16,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t ci-app:latest -f infra/Dockerfile .'
+                sh 'docker build -t ci-app:latest -f ../infra/Dockerfile ..'
             }
         }
 
