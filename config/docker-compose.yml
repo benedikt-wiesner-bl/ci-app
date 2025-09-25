@@ -57,3 +57,16 @@ services:
       - ../grafana/provisioning:/etc/grafana/provisioning
       - ../grafana/dashboards:/var/lib/grafana/dashboards
     restart: unless-stopped
+
+  sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - ../volumes/sonarqube_data:/opt/sonarqube/data
+      - ../volumes/sonarqube_extensions:/opt/sonarqube/extensions
+      - ../volumes/sonarqube_logs:/opt/sonarqube/logs
+    restart: unless-stopped

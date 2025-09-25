@@ -71,7 +71,7 @@ pipeline {
         post {
             always {
                 sh 'docker ps -a'
-                archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true, allowEmptyArchive: true
+                archiveArtifacts artifacts: '**/trivy-report.json', fingerprint: true, allowEmptyArchive: true
             }
             success {
                 echo "✅ Deployment erfolgreich!"
@@ -80,5 +80,6 @@ pipeline {
                 echo "❌ Deployment fehlgeschlagen!"
             }
         }
+
 
 }
