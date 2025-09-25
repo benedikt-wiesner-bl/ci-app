@@ -1,13 +1,9 @@
 #!/bin/bash
 set -e
-
 cd "$(dirname "$0")/.."
-
 BACKUP_DIR="backups"
 TIMESTAMP=$(date +%F_%H-%M)
-
 mkdir -p "$BACKUP_DIR"
-
 tar -czvf "$BACKUP_DIR/full-backup-volumes-data-$TIMESTAMP.tar.gz" \
   volumes/jenkins \
   volumes/grafana \
@@ -16,7 +12,6 @@ tar -czvf "$BACKUP_DIR/full-backup-volumes-data-$TIMESTAMP.tar.gz" \
   config/docker-compose.yml \
   config/Jenkinsfile \
   config/prometheus.yml \
-  config/requirements.txt
-
+  requirements.txt
 PARENT_BACKUP="backups/project-full-backup-$TIMESTAMP.tar.gz"
 tar -czvf "$PARENT_BACKUP" .
