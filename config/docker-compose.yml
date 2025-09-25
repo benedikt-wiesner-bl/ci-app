@@ -1,3 +1,4 @@
+version: "3.9"
 
 services:
   jenkins:
@@ -15,15 +16,41 @@ services:
       - /root/.ssh:/root/.ssh:ro
     restart: unless-stopped
 
-  ci-app:
+  # Blue Version der App
+  ci-app-blue:
     build:
       context: ..
       dockerfile: infrastructure/Dockerfile
-    container_name: ci-app
+    container_name: ci-app-blue
     ports:
       - "5001:5000"
     volumes:
       - ../data:/app/data
+    restart: unless-stopped
+
+  # Green Version der App
+  ci-app-green:
+    build:
+      context: ..
+      dockerfile: infrastructure/Dockerfile
+    container_name: ci-app-green
+    ports:
+      - "5002:5000"
+    volumes:
+      - ../data:/app/data
+    restart: unless-stopped
+
+  # Nginx Proxy für Blue-Green Switch
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "8085:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - ci-app-blue
+      - ci-app-green
     restart: unless-stopped
 
   cadvisor:

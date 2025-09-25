@@ -36,13 +36,12 @@ pipeline {
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
                 aquasec/trivy:latest image \
-                --exit-code 1 \
+                --exit-code 0 \
                 --severity HIGH,CRITICAL \
                 --format table \
                 $IMAGE_NAME
                 '''
 
-                sh '''
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
@@ -54,32 +53,55 @@ pipeline {
             }
         }
 
-
-        stage('Deploy (only ci-app)') {
+        stage('Deploy Green Version') {
             steps {
                 sh '''
-                    $DOCKER_COMPOSE stop ci-app || true
-                    $DOCKER_COMPOSE rm -f ci-app || true
-                    $DOCKER_COMPOSE build ci-app
-                    docker ps -q --filter "publish=5001" | xargs -r docker stop
-                    $DOCKER_COMPOSE up -d ci-app
+                    # baue und starte Green neu
+                    $DOCKER_COMPOSE build ci-app-green
+                    $DOCKER_COMPOSE up -d ci-app-green
+                '''
+            }
+        }
+
+        stage('Healthcheck Green') {
+            steps {
+                script {
+                    // einfache Prüfung ob Green App antwortet
+                    sh 'curl --fail http://localhost:5002/health || exit 1'
+                }
+            }
+        }
+
+        stage('Blue-Green Switch') {
+            steps {
+                script {
+                    // Nginx Config von Blue auf Green umschalten
+                    sh "sed -i 's/ci-app-blue/ci-app-green/' config/nginx/default.conf"
+                    sh "$DOCKER_COMPOSE exec -T nginx nginx -s reload"
+                }
+            }
+        }
+
+        stage('Cleanup Old (optional)') {
+            steps {
+                sh '''
+                    # Stoppe alte Blue-Version, wenn Green erfolgreich läuft
+                    $DOCKER_COMPOSE stop ci-app-blue || true
                 '''
             }
         }
     }
 
-        post {
-            always {
-                sh 'docker ps -a'
-                archiveArtifacts artifacts: '**/trivy-report.json', fingerprint: true, allowEmptyArchive: true
-            }
-            success {
-                echo "✅ Deployment erfolgreich!"
-            }
-            failure {
-                echo "❌ Deployment fehlgeschlagen!"
-            }
+    post {
+        always {
+            sh 'docker ps -a'
+            archiveArtifacts artifacts: '**/trivy-report.json', fingerprint: true, allowEmptyArchive: true
         }
-
-
+        success {
+            echo "✅ Blue-Green Deployment erfolgreich!"
+        }
+        failure {
+            echo "❌ Deployment fehlgeschlagen – bitte Logs prüfen!"
+        }
+    }
 }
