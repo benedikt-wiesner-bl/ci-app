@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ci-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ci-app
+  template:
+    metadata:
+      labels:
+        app: ci-app
+    spec:
+      containers:
+        - name: ci-app
+          image: ci-app:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          resources:
+            limits:
+              memory: "512Mi"
+            requests:
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ci-app-service
+spec:
+  type: NodePort
+  selector:
+    app: ci-app
+  ports:
+    - port: 5000
+      targetPort: 5000
+      nodePort: 30001
