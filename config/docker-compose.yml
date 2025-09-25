@@ -65,6 +65,11 @@ services:
       - "9000:9000"
     environment:
       - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      - SONARQUBE_JAVA_OPTS=-Xmx2g -Xms1g
+    deploy:
+      resources:
+        limits:
+          memory: 4g
     volumes:
       - ../volumes/sonarqube_data:/opt/sonarqube/data
       - ../volumes/sonarqube_extensions:/opt/sonarqube/extensions
