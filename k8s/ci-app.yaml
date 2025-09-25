@@ -15,24 +15,21 @@ spec:
       containers:
         - name: ci-app
           image: ci-app:latest
-          imagePullPolicy: Never
+          imagePullPolicy: Never   # weil du lokal baust
           ports:
             - containerPort: 5000
           resources:
             limits:
               memory: "512Mi"
-            requests:
-              memory: "128Mi"
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: ci-app-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: ci-app
   ports:
     - port: 5000
       targetPort: 5000
-      nodePort: 30001

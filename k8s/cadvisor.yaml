@@ -26,10 +26,9 @@ kind: Service
 metadata:
   name: cadvisor-service
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: cadvisor
   ports:
     - port: 8080
       targetPort: 8080
-      nodePort: 30002
