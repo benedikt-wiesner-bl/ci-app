@@ -32,8 +32,8 @@ pipeline {
                     docker-compose stop ci-app || true
                     docker-compose rm -f ci-app || true
                     docker-compose build ci-app
+                    docker ps -q --filter "publish=5001" | xargs -r docker stop
                     docker-compose up -d ci-app
-
                 '''
             }
         }
