@@ -78,8 +78,9 @@ pipeline {
 
                     // Healthcheck mit Retry (max 30s)
                     sh """
-                    echo 'Warte auf Healthcheck von ${target} (Port ${targetPort})...'
-                    for i in \$(seq 1 10); do
+                    echo '⏳ Warte 5s bevor der Healthcheck startet...'
+                    sleep 5
+                    for i in \$(seq 1 15); do
                     if curl --silent --fail http://localhost:${targetPort}/health; then
                         echo '✅ Healthcheck erfolgreich!'
                         exit 0
@@ -88,8 +89,11 @@ pipeline {
                     sleep 3
                     done
                     echo '❌ Healthcheck fehlgeschlagen!'
+                    echo '--- Logs von ${target} ---'
+                    docker logs ${target} || true
                     exit 1
-                    """
+"""
+
 
 
                     // Umschalten in Nginx
