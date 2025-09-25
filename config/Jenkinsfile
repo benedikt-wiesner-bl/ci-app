@@ -54,7 +54,6 @@ pipeline {
             }
         }
 
-
         stage('Deploy New Version (Blue ↔ Green)') {
             steps {
                 script {
@@ -68,8 +67,10 @@ pipeline {
 
                     echo "Aktuell aktiv: ${current}, neue Version: ${target}"
 
-                    // build & start neue Version
+                    // alte Target-Version stoppen & entfernen, falls vorhanden
                     sh """
+                        $DOCKER_COMPOSE stop ${target} || true
+                        $DOCKER_COMPOSE rm -f ${target} || true
                         $DOCKER_COMPOSE build ${target}
                         $DOCKER_COMPOSE up -d ${target}
                     """
@@ -92,8 +93,9 @@ pipeline {
             steps {
                 script {
                     echo "Alte Version bleibt erstmal aktiv für Rollback."
-                    // Wenn du willst: hier explizit stoppen
+                    // Falls du sie direkt killen willst:
                     // sh "$DOCKER_COMPOSE stop ${current} || true"
+                    // sh "$DOCKER_COMPOSE rm -f ${current} || true"
                 }
             }
         }
