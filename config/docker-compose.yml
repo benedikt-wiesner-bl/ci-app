@@ -1,8 +1,10 @@
+name: ci-app
+
 services:
   jenkins:
     build:
       context: ..
-      dockerfile: infra/Dockerfile.jenkins
+      dockerfile: infrastructure/Dockerfile.jenkins
     container_name: jenkins
     user: root
     ports:
