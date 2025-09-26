@@ -44,9 +44,9 @@ pipeline {
 
         stage('Trivy Scan (HTML Only)') {
             steps {
-                sh 'mkdir -p trivy-report'
+                sh 'rm -rf trivy-report && mkdir -p trivy-report'
 
-                // Tabellen-Report direkt in die Console
+                // Tabellen-Report nur in die Console
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -57,7 +57,7 @@ pipeline {
                 "$IMAGE_NAME"
                 """
 
-                // HTML-Report speichern (Template aus config/trivy mounten)
+                // HTML-Report speichern (mit Template aus deinem Repo)
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -70,10 +70,11 @@ pipeline {
                 $IMAGE_NAME
                 """
 
-                // Check ob HTML wirklich da ist
+                // Check ob HTML existiert
                 sh 'ls -l trivy-report || echo "⚠️ Trivy Report fehlt!"'
             }
         }
+
 
         stage('Deploy New Version (Blue or Green)') {
             steps {
