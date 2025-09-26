@@ -42,11 +42,11 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan') {
+        stage('Trivy Scan (HTML Only)') {
             steps {
                 sh 'mkdir -p trivy-report'
 
-                // Tabellen-Report direkt in der Console
+                // Tabellen-Report direkt in die Console
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -57,20 +57,7 @@ pipeline {
                 "$IMAGE_NAME"
                 """
 
-                // JSON-Report speichern
-                sh """
-                docker run --rm \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v $WORKSPACE:/workspace \
-                aquasec/trivy:latest image \
-                --format json \
-                $IMAGE_NAME > trivy-report/trivy-report.json
-                """
-            }
-        }
-
-        stage('Trivy HTML Report') {
-            steps {
+                // HTML-Report speichern (mit deinem Template aus config/trivy)
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -82,7 +69,8 @@ pipeline {
                 $IMAGE_NAME
                 """
 
-                sh 'ls -l trivy-report || echo "⚠️ Trivy Reports fehlen!"'
+                // Check ob HTML wirklich da ist
+                sh 'ls -l trivy-report || echo "⚠️ Trivy Report fehlt!"'
             }
         }
 
