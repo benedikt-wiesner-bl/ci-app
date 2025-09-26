@@ -17,6 +17,7 @@ pipeline {
                     credentialsId: 'github-ci-key'
             }
         }
+
         stage('Code Quality') {
             agent {
                 docker {
