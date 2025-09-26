@@ -64,16 +64,17 @@ pipeline {
                   "$IMAGE_NAME" > $WORKSPACE/trivy-report.json
                 """
 
-                // HTML-Report mit eingebautem Template
+                // HTML-Report mit deinem Template aus config/trivy
                 sh """
                 docker run --rm \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  -v $WORKSPACE:/workspace \
-                  aquasec/trivy:latest image \
-                  --format template \
-                  --template @contrib/html.tpl \
-                  -o /workspace/trivy-report.html \
-                  $IMAGE_NAME
+                    -v /var/run/docker.sock:/var/run/docker.sock \
+                    -v $WORKSPACE:/workspace \
+                    -v $WORKSPACE/config/trivy:/contrib \
+                    aquasec/trivy:latest image \
+                    --format template \
+                    --template /contrib/html.tpl \
+                    -o /workspace/trivy-report.html \
+                    $IMAGE_NAME
                 """
 
                 sh 'ls -l $WORKSPACE/trivy-report.* || echo "⚠️ Trivy Reports fehlen!"'
