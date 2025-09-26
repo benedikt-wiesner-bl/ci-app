@@ -46,31 +46,31 @@ pipeline {
             steps {
                 sh """
                 docker run --rm \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  aquasec/trivy:latest image \
-                  --exit-code 0 \
-                  --severity HIGH,CRITICAL \
-                  --format table \
-                  "$IMAGE_NAME"
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                aquasec/trivy:latest image \
+                --exit-code 0 \
+                --severity HIGH,CRITICAL \
+                --format table \
+                "$IMAGE_NAME"
                 """
 
                 sh """
                 docker run --rm \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  aquasec/trivy:latest image \
-                  --format json \
-                  "$IMAGE_NAME" > $WORKSPACE/trivy-report.json
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                aquasec/trivy:latest image \
+                --format json \
+                "$IMAGE_NAME" > $WORKSPACE/trivy-report.json
                 """
 
                 sh """
                 docker run --rm \
-                  -v /var/run/docker.sock:/var/run/docker.sock \
-                  -v $WORKSPACE:/workspace \
-                  aquasec/trivy:latest image \
-                  --format template \
-                  --template "@contrib/html.tpl" \
-                  -o /workspace/trivy-report.html \
-                  "$IMAGE_NAME"
+                -v /var/run/docker.sock:/var/run/docker.sock \
+                -v $WORKSPACE:/workspace \
+                aquasec/trivy:latest image \
+                --format template \
+                --template /workspace/html.tpl \
+                -o /workspace/trivy-report.html \
+                $IMAGE_NAME
                 """
 
                 sh 'ls -l $WORKSPACE/trivy-report.* || echo "⚠️ Trivy Reports fehlen!"'
