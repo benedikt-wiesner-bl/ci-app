@@ -2,7 +2,6 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-{{- if . }}
     <style>
       * { font-family: Arial, Helvetica, sans-serif; }
       h1 { text-align: center; }
@@ -32,7 +31,7 @@
       .links[data-more-links=off] a:nth-of-type(1n+5) { display: none; }
       a.toggle-more-links { cursor: pointer; }
     </style>
-    <title>{{- escapeXML ( index . 0 ).Target }} - Trivy Report - {{ now }}</title>
+    <title>Trivy Report - {{ now }}</title>
     <script>
       window.onload = function() {
         document.querySelectorAll('td.links').forEach(function(linkCell) {
@@ -60,9 +59,9 @@
     </script>
   </head>
   <body>
-    <h1>{{- escapeXML ( index . 0 ).Target }} - Trivy Report - {{ now }}</h1>
+    <h1>Trivy Report - {{ now }}</h1>
 
-    <!-- Report Summary Table -->
+    <!-- Report Summary Table (immer da, auch bei 0 Findings) -->
     <h2>Report Summary</h2>
     <table>
       <tr class="sub-header">
@@ -70,6 +69,7 @@
         <th>Type</th>
         <th>Vulnerabilities</th>
         <th>Secrets</th>
+        <th>Misconfigurations</th>
       </tr>
       {{- range . }}
       <tr>
@@ -77,70 +77,74 @@
         <td>{{ escapeXML .Type }}</td>
         <td>{{ len .Vulnerabilities }}</td>
         <td>{{ if .Secrets }}{{ len .Secrets }}{{ else }}-{{ end }}</td>
+        <td>{{ if .Misconfigurations }}{{ len .Misconfigurations }}{{ else }}0{{ end }}</td>
       </tr>
       {{- end }}
     </table>
 
+    <!-- Details Section -->
     <h2>Details</h2>
+    {{- if . }}
     <table>
-    {{- range . }}
-      <tr class="group-header"><th colspan="6">{{ .Type | toString | escapeXML }}</th></tr>
-      {{- if (eq (len .Vulnerabilities) 0) }}
-      <tr><th colspan="6">No Vulnerabilities found</th></tr>
-      {{- else }}
-      <tr class="sub-header">
-        <th>Package</th>
-        <th>Vulnerability ID</th>
-        <th>Severity</th>
-        <th>Installed Version</th>
-        <th>Fixed Version</th>
-        <th>Links</th>
-      </tr>
-        {{- range .Vulnerabilities }}
-      <tr class="severity-{{ escapeXML .Vulnerability.Severity }}">
-        <td class="pkg-name">{{ escapeXML .PkgName }}</td>
-        <td>{{ escapeXML .VulnerabilityID }}</td>
-        <td class="severity">{{ escapeXML .Vulnerability.Severity }}</td>
-        <td class="pkg-version">{{ escapeXML .InstalledVersion }}</td>
-        <td>{{ escapeXML .FixedVersion }}</td>
-        <td class="links" data-more-links="off">
-          {{- range .Vulnerability.References }}
-          <a href={{ escapeXML . | printf "%q" }}>{{ escapeXML . }}</a>
-          {{- end }}
-        </td>
-      </tr>
-        {{- end }}
-      {{- end }}
+      {{- range . }}
+        <tr class="group-header"><th colspan="6">{{ .Type | toString | escapeXML }}</th></tr>
 
-      {{- if (eq (len .Misconfigurations ) 0) }}
-      <tr><th colspan="6">No Misconfigurations found</th></tr>
-      {{- else }}
-      <tr class="sub-header">
-        <th>Type</th>
-        <th>Misconf ID</th>
-        <th>Check</th>
-        <th>Severity</th>
-        <th>Message</th>
-      </tr>
-        {{- range .Misconfigurations }}
-      <tr class="severity-{{ escapeXML .Severity }}">
-        <td class="misconf-type">{{ escapeXML .Type }}</td>
-        <td>{{ escapeXML .ID }}</td>
-        <td class="misconf-check">{{ escapeXML .Title }}</td>
-        <td class="severity">{{ escapeXML .Severity }}</td>
-        <td class="link" data-more-links="off" style="white-space:normal;">
-          {{ escapeXML .Message }}
-          <br><a href={{ escapeXML .PrimaryURL | printf "%q" }}>{{ escapeXML .PrimaryURL }}</a>
-        </td>
-      </tr>
+        <!-- Vulnerabilities -->
+        {{- if (eq (len .Vulnerabilities) 0) }}
+          <tr><th colspan="6">No Vulnerabilities found</th></tr>
+        {{- else }}
+          <tr class="sub-header">
+            <th>Package</th>
+            <th>Vulnerability ID</th>
+            <th>Severity</th>
+            <th>Installed Version</th>
+            <th>Fixed Version</th>
+            <th>Links</th>
+          </tr>
+          {{- range .Vulnerabilities }}
+          <tr class="severity-{{ escapeXML .Vulnerability.Severity }}">
+            <td class="pkg-name">{{ escapeXML .PkgName }}</td>
+            <td>{{ escapeXML .VulnerabilityID }}</td>
+            <td class="severity">{{ escapeXML .Vulnerability.Severity }}</td>
+            <td class="pkg-version">{{ escapeXML .InstalledVersion }}</td>
+            <td>{{ escapeXML .FixedVersion }}</td>
+            <td class="links" data-more-links="off">
+              {{- range .Vulnerability.References }}
+              <a href={{ escapeXML . | printf "%q" }}>{{ escapeXML . }}</a>
+              {{- end }}
+            </td>
+          </tr>
+          {{- end }}
+        {{- end }}
+
+        <!-- Misconfigurations -->
+        {{- if (eq (len .Misconfigurations) 0) }}
+          <tr><th colspan="6">No Misconfigurations found</th></tr>
+        {{- else }}
+          <tr class="sub-header">
+            <th>Type</th>
+            <th>Misconf ID</th>
+            <th>Check</th>
+            <th>Severity</th>
+            <th>Message</th>
+          </tr>
+          {{- range .Misconfigurations }}
+          <tr class="severity-{{ escapeXML .Severity }}">
+            <td class="misconf-type">{{ escapeXML .Type }}</td>
+            <td>{{ escapeXML .ID }}</td>
+            <td class="misconf-check">{{ escapeXML .Title }}</td>
+            <td class="severity">{{ escapeXML .Severity }}</td>
+            <td class="link" style="white-space:normal;">
+              {{ escapeXML .Message }}
+              <br><a href={{ escapeXML .PrimaryURL | printf "%q" }}>{{ escapeXML .PrimaryURL }}</a>
+            </td>
+          </tr>
+          {{- end }}
         {{- end }}
       {{- end }}
-    {{- end }}
     </table>
-{{- else }}
-  </head>
-  <body>
-    <h1>Trivy Returned Empty Report</h1>
-{{- end }}
+    {{- else }}
+      <p><b>No results in report.</b></p>
+    {{- end }}
   </body>
 </html>
