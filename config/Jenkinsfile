@@ -44,7 +44,6 @@ pipeline {
 
         stage('Security Scan with Trivy') {
             steps {
-                // Table-Report (nur in Logs)
                 sh """
                 docker run --rm \
                   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -55,7 +54,6 @@ pipeline {
                   "$IMAGE_NAME"
                 """
 
-                // JSON-Report direkt ins Workspace-File schreiben
                 sh """
                 docker run --rm \
                   -v /var/run/docker.sock:/var/run/docker.sock \
@@ -64,8 +62,18 @@ pipeline {
                   "$IMAGE_NAME" > $WORKSPACE/trivy-report.json
                 """
 
-                // Check ob Datei da ist
-                sh 'ls -l $WORKSPACE/trivy-report.json || echo "⚠️ trivy-report.json fehlt!"'
+                sh """
+                docker run --rm \
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v $WORKSPACE:/workspace \
+                  aquasec/trivy:latest image \
+                  --format template \
+                  --template "@contrib/html.tpl" \
+                  -o /workspace/trivy-report.html \
+                  "$IMAGE_NAME"
+                """
+
+                sh 'ls -l $WORKSPACE/trivy-report.* || echo "⚠️ Trivy Reports fehlen!"'
             }
         }
 
@@ -126,7 +134,16 @@ pipeline {
     post {
         always {
             sh 'docker ps -a'
-            archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true, allowEmptyArchive: true
+            archiveArtifacts artifacts: 'trivy-report.*', fingerprint: true, allowEmptyArchive: true
+
+            publishHTML(target: [
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: '.',
+                reportFiles: 'trivy-report.html',
+                reportName: 'Trivy Security Report'
+            ])
         }
         success {
             echo "✅ Blue-Green Deployment erfolgreich!"
@@ -136,3 +153,4 @@ pipeline {
         }
     }
 }
+
