@@ -72,17 +72,16 @@ pipeline {
         stage('Trivy HTML Report') {
             steps {
                 sh """
-                mkdir -p trivy-report
                 docker run --rm \
                 --entrypoint /bin/sh \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
-                -v $WORKSPACE/config/trivy:/contrib \
                 aquasec/trivy:latest -c '
                     mkdir -p /workspace/trivy-report &&
-                    trivy image --format template --template /contrib/html.tpl \
+                    trivy image --format template \
+                    --template "@contrib/html.tpl" \
                     -o /workspace/trivy-report/trivy-report.html \
-                    ci-app:latest
+                    $IMAGE_NAME
                 '
                 """
 
