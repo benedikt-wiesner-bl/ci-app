@@ -1,102 +1,103 @@
+
 # ci-app
 
-Ein leichtgewichtiges **CI/CD- und Monitoring-Lab** mit Jenkins, einer ToDo-App (Python/Flask), Prometheus, Grafana, cAdvisor, Dozzle – und integriertem **Security-Scanning mit Trivy**.  
-Alles läuft über `Docker` und `docker compose` auf deinem lokalen Rechner.  
+A lightweight **CI/CD and monitoring lab** with Jenkins, a ToDo app (Python/Flask), Prometheus, Grafana, cAdvisor, Dozzle – and integrated **security scanning with Trivy**.
+Everything runs via `Docker` and `docker compose` on your local machine.
 
 ---
 
 ## Features
 
-- **CI/CD mit Jenkins**  
-  Nutze Jenkins mit einem `Jenkinsfile`, um deine App automatisch zu bauen, zu testen und **Blue-Green-Deployments** durchzuführen.  
+- **CI/CD with Jenkins**
+  Use Jenkins with a `Jenkinsfile` to automatically build, test, and perform **blue-green deployments** of your app.
 
-- **Python ToDo-App**  
-  Kleine Flask-Anwendung mit SQLite als Beispielprojekt.  
-  - Läuft intern als zwei Container (`ci-app-blue` und `ci-app-green`)  
-  - Jenkins schaltet via Nginx zwischen beiden Versionen um → **Zero-Downtime-Deployment**  
+- **Python ToDo App**
+  Small Flask application with SQLite as an example project.
+  - Runs internally as two containers (`ci-app-blue` and `ci-app-green`)
+  - Jenkins switches between both versions via Nginx → **zero-downtime deployment**
 
-- **Monitoring & Logging**  
-  - `Prometheus` sammelt Metriken  
-  - `Grafana` visualisiert Dashboards  
-  - `cAdvisor` zeigt Container-Ressourcen  
-  - `Dozzle` stellt Logs aller Container im Browser dar  
+- **Monitoring & Logging**
+  - `Prometheus` collects metrics
+  - `Grafana` visualizes dashboards
+  - `cAdvisor` shows container resources
+  - `Dozzle` provides logs of all containers in the browser
 
-- **Security Scanning**  
-  Jenkins-Pipelines führen mit **Trivy** Container- und Dependency-Scans durch, um bekannte Schwachstellen zu identifizieren.  
+- **Security Scanning**
+  Jenkins pipelines run **Trivy** container and dependency scans to identify known vulnerabilities.
 
-- **Einheitliche Umgebung**  
-  Alles in `docker-compose.yml` definiert, mit persistenten Volumes für Jenkins, Grafana und Prometheus.  
+- **Unified Environment**
+  Everything is defined in `docker-compose.yml`, with persistent volumes for Jenkins, Grafana, and Prometheus.
 
-- **UI-Komfort**  
-  Deine ToDo-App enthält im Footer Links zu allen Services → kein Portsuchen mehr.  
+- **UI Convenience**
+  Your ToDo app includes footer links to all services → no more port hunting.
 
 ---
 
 ## Installation & Setup
 
-### Voraussetzungen
+### Prerequisites
 
-- [Git](https://git-scm.com/)  
-- [Docker](https://docs.docker.com/get-docker/)  
-- [Docker Compose](https://docs.docker.com/compose/) (ist bei Docker Desktop dabei)  
+- [Git](https://git-scm.com/)
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/) (included with Docker Desktop)
 
-### Schritte
+### Steps
 
-1. **Repository klonen**
+1. **Clone Repository**
 
 ```bash
 git clone https://github.com/benedikt-wiesner-bl/ci-app.git
 cd ci-app
 ```
 
-2. **Services starten**
+2. **Start Services**
 
 ```bash
 docker compose -f config/docker-compose.yml up --build -d
 ```
 
-Das baut die Images und startet alle Services im Hintergrund.  
-Beim ersten Start kann Jenkins ein paar Minuten brauchen.  
+This builds the images and starts all services in the background.
+On first start, Jenkins may take a few minutes.
 
-3. **Services im Browser aufrufen**
+3. **Access Services in Browser**
 
-- **ToDo-App (immer via Nginx)** → [http://localhost:8085](http://localhost:8085)  
-- **Jenkins** → [http://localhost:8080](http://localhost:8080)  
-  - Initiales Admin-Password:  
+- **ToDo App (always via Nginx)** → [http://localhost:8085](http://localhost:8085)
+- **Jenkins** → [http://localhost:8080](http://localhost:8080)
+  - Initial admin password:
     ```bash
     docker logs jenkins | grep "initialAdminPassword"
     ```
-- **Grafana** → [http://localhost:3000](http://localhost:3000)  
-  - Login: `admin` / `admin` (beim ersten Mal Passwort ändern)  
-- **Prometheus** → [http://localhost:9090](http://localhost:9090)  
-- **cAdvisor** → [http://localhost:8081](http://localhost:8081)  
-- **Dozzle (Logs)** → [http://localhost:9999](http://localhost:9999)  
+- **Grafana** → [http://localhost:3000](http://localhost:3000)
+  - Login: `admin` / `admin` (change password on first login)
+- **Prometheus** → [http://localhost:9090](http://localhost:9090)
+- **cAdvisor** → [http://localhost:8081](http://localhost:8081)
+- **Dozzle (Logs)** → [http://localhost:9999](http://localhost:9999)
 
 ---
 
-## CI/CD mit Blue-Green & Security Scan
+## CI/CD with Blue-Green & Security Scan
 
-Dein `Jenkinsfile` enthält mehrere Stages:  
+Your `Jenkinsfile` contains several stages:
 
-1. **Build**  
-   Baut die Python ToDo-App als Docker-Image.  
+1. **Build**
+   Builds the Python ToDo app as a Docker image.
 
-2. **Test**  
-   Führt Unit-Tests (z. B. mit `pytest`) durch.  
+2. **Test**
+   Runs unit tests (e.g., with `pytest`).
 
-3. **Security Scan (Trivy)**  
-   Scannt das gebaute Docker-Image und deine Dependencies auf Schwachstellen.  
+3. **Security Scan (Trivy)**
+   Scans the built Docker image and your dependencies for vulnerabilities.
 
-4. **Deploy (Blue-Green)**  
-   - Jenkins deployt die neue Version in einen inaktiven Container (`blue` oder `green`).  
-   - Führt einen Healthcheck (`/health`) durch.  
-   - Schaltet Nginx auf die neue Version um → die alte Version bleibt für Rollback verfügbar.  
+4. **Deploy (Blue-Green)**
+   - Jenkins deploys the new version into an inactive container (`blue` or `green`).
+   - Runs a healthcheck (`/health`).
+   - Switches Nginx to the new version → the old version remains available for rollback.
 
 ---
 
-## Lokale Entwicklung der App
+## Local Development of the App
 
-Die App ist für Docker gedacht, kann aber auch lokal laufen:
+The app is designed for Docker, but can also run locally:
 
 ```bash
 cd app
@@ -104,18 +105,26 @@ pip install -r requirements.txt
 python __init__.py
 ```
 
-→ dann läuft sie auf [http://localhost:5000](http://localhost:5000) (nur lokal, ohne Nginx).  
+→ then it runs on [http://localhost:5000](http://localhost:5000) (local only, without Nginx).
 
 ---
 
-## Ordnerstruktur
+## Folder Structure
 
 ```
 ci-app/
-│── app/                # Flask ToDo-App
-│── infrastructure/      # Dockerfiles für Jenkins und App
-│── grafana/             # Provisioning & Dashboards           
-│── config/              # docker-compose.yml + nginx
-│── prometheus.yml       # Prometheus-Konfiguration
+│── app/                 # Flask ToDo app
+│   └── templates/       # HTML templates (base.html, index.html)
+│── config/              # docker-compose.yml, nginx, Jenkinsfile, prometheus.yml
+│   └── nginx/           # Nginx config
+│── data/                # SQLite database (todos.db)
+│── grafana/             # Grafana provisioning & dashboards
+│── infrastructure/      # Dockerfiles for Jenkins and app
+│── jenkins_ss/          # SSH keys & config for Jenkins
+│── scripts/             # Helper scripts (backup.sh, boot.sh)
+│── tests/               # Unit tests for the app
+│── .dockerignore
+│── .gitignore
 │── README.md
+│── requirements.txt
 ```
