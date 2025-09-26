@@ -1,7 +1,7 @@
 pipeline {
     agent any
     options {
-        skipDefaultCheckout(true) // verhindert doppeltes Checkout
+        skipDefaultCheckout(true)
     }
 
     environment {
@@ -17,6 +17,12 @@ pipeline {
                     credentialsId: 'github-ci-key'
             }
         }
+        stage('Code Quality') {
+                steps {
+                    sh 'pip install flake8'
+                    sh 'flake8 app/ --max-line-length=100 --statistics'
+                }
+            }
 
         stage('Build Docker Image') {
             steps {
@@ -55,19 +61,17 @@ pipeline {
             }
         }
 
-        stage('Deploy New Version (Blue ↔ Green)') {
+        stage('Deploy New Version (Blue or Green)') {
             steps {
                 script {
-                    // aktuelle Version aus Nginx-Config ermitteln
                     def current = sh(
                         script: "grep -o 'ci-app-[a-z]*' config/nginx/default.conf | head -n1",
                         returnStdout: true
                     ).trim()
                     def target = (current == "ci-app-blue") ? "ci-app-green" : "ci-app-blue"
 
-                    echo "🔵 Aktuell: ${current}, 🟢 Ziel: ${target}"
+                    echo "Aktuell: ${current}, Ziel: ${target}"
 
-                    // alte Target-Version stoppen & entfernen
                     sh """
                         $DOCKER_COMPOSE stop ${target} || true
                         $DOCKER_COMPOSE rm -f ${target} || true
@@ -75,38 +79,35 @@ pipeline {
                         $DOCKER_COMPOSE up -d ${target}
                     """
 
-                    // Healthcheck über den Service-Namen im Compose-Netzwerk
                     sh """
-                    echo '⏳ Warte 5s bevor der Healthcheck startet...'
+                    echo 'Warte 5s bevor der Healthcheck startet...'
                     sleep 5
                     for i in \$(seq 1 15); do
                       if docker exec nginx curl --silent --fail http://${target}:5000/health; then
-                        echo '✅ Healthcheck erfolgreich!'
+                        echo 'Healthcheck erfolgreich!'
                         exit 0
                       fi
-                      echo "⏳ Versuch \$i fehlgeschlagen, retry in 3s..."
+                      echo "Versuch \$i fehlgeschlagen, retry in 3s..."
                       sleep 3
                     done
-                    echo '❌ Healthcheck fehlgeschlagen!'
+                    echo 'Healthcheck fehlgeschlagen!'
                     echo '--- Logs von ${target} ---'
                     docker logs ${target} || true
                     exit 1
                     """
 
-                    // Umschalten in Nginx
                     sh "sed -i 's/${current}/${target}/' config/nginx/default.conf"
                     sh "$DOCKER_COMPOSE exec -T nginx nginx -s reload"
 
-                    echo "🔀 Umschaltung von ${current} → ${target} erfolgreich!"
+                    echo "Umschaltung von ${current} → ${target} erfolgreich!"
                 }
             }
         }
 
-        stage('Cleanup Old (optional)') {
+        stage('Cleanup Old') {
             steps {
                 script {
-                    echo "🧹 Alte Version bleibt erstmal aktiv für Rollback."
-                    // Falls du sie sofort entfernen willst:
+                    echo "Alte Version bleibt erstmal aktiv für Rollback."
                     // sh "$DOCKER_COMPOSE stop ${current} || true"
                     // sh "$DOCKER_COMPOSE rm -f ${current} || true"
                 }
@@ -123,7 +124,7 @@ pipeline {
             echo "✅ Blue-Green Deployment erfolgreich!"
         }
         failure {
-            echo "❌ Deployment fehlgeschlagen – bitte Logs prüfen!"
+            echo "❌ Deployment fehlgeschlagen - bitte Logs prüfen!"
         }
     }
 }
