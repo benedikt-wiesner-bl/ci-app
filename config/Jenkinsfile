@@ -42,9 +42,8 @@ pipeline {
             }
         }
 
-       stage('Trivy Scan') {
+        stage('Trivy Scan') {
             steps {
-                // Ordner lokal im Workspace erstellen (Host-Seite)
                 sh 'mkdir -p trivy-report'
 
                 // Tabellen-Report direkt in der Console
@@ -58,33 +57,32 @@ pipeline {
                 "$IMAGE_NAME"
                 """
 
-                // JSON-Report speichern (Ordner auch im Container anlegen!)
+                // JSON-Report speichern
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
-                aquasec/trivy:latest sh -c '
-                    mkdir -p /workspace/trivy-report &&
-                    trivy image --format json "$IMAGE_NAME" > /workspace/trivy-report/trivy-report.json
-                '
+                aquasec/trivy:latest image \
+                --format json \
+                $IMAGE_NAME > trivy-report/trivy-report.json
                 """
             }
         }
 
-
         stage('Trivy HTML Report') {
             steps {
+                sh 'mkdir -p trivy-report'
+
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
                 -v $WORKSPACE/config/trivy:/contrib \
-                aquasec/trivy:latest sh -c '
-                    mkdir -p /workspace/trivy-report &&
-                    trivy image --format template --template /contrib/html.tpl \
-                    -o /workspace/trivy-report/trivy-report.html \
-                    "$IMAGE_NAME"
-                '
+                aquasec/trivy:latest image \
+                --format template \
+                --template /contrib/html.tpl \
+                -o /workspace/trivy-report/trivy-report.html \
+                $IMAGE_NAME
                 """
 
                 sh 'ls -l trivy-report || echo "⚠️ Trivy Reports fehlen!"'
