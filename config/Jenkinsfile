@@ -141,7 +141,7 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: '.',
+                reportDir: "${WORKSPACE}",
                 reportFiles: 'trivy-report.html',
                 reportName: 'Trivy Security Report'
             ])
@@ -153,4 +153,5 @@ pipeline {
             echo "❌ Deployment fehlgeschlagen - bitte Logs prüfen!"
         }
     }
+
 }
