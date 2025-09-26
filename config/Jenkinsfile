@@ -52,7 +52,7 @@ pipeline {
                 --exit-code 0 \
                 --severity HIGH,CRITICAL \
                 --format table \
-                $IMAGE_NAME
+                "${IMAGE_NAME}"
                 """
 
                 sh """
@@ -62,10 +62,13 @@ pipeline {
                 aquasec/trivy:latest image \
                 --format json \
                 --output /workspace/trivy-report.json \
-                $IMAGE_NAME
+                "${IMAGE_NAME}"
                 """
+
+                sh 'ls -l $WORKSPACE/trivy-report.json || echo "trivy-report.json nicht gefunden!"'
             }
         }
+
 
         stage('Deploy New Version (Blue or Green)') {
             steps {
@@ -124,7 +127,8 @@ pipeline {
     post {
         always {
             sh 'docker ps -a'
-            archiveArtifacts artifacts: 'trivy-report.json', fingerprint: true, allowEmptyArchive: true
+            sh 'ls -l $WORKSPACE'
+            archiveArtifacts artifacts: 'trivy-report.json'
         }
         success {
             echo "✅ Blue-Green Deployment erfolgreich!"
