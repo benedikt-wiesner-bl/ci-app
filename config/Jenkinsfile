@@ -44,55 +44,51 @@ pipeline {
 
         stage('Trivy Scan') {
             steps {
-                // Ordner vorbereiten
-                sh 'mkdir -p $WORKSPACE/trivy-report'
+                // Ordner vorbereiten (relativ → landet im $WORKSPACE Host-Ordner)
+                sh 'mkdir -p trivy-report'
 
                 // Tabellen-Report direkt in der Console
                 sh """
                 docker run --rm \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                aquasec/trivy:latest image \
-                --exit-code 0 \
-                --severity HIGH,CRITICAL \
-                --format table \
-                "$IMAGE_NAME"
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  aquasec/trivy:latest image \
+                  --exit-code 0 \
+                  --severity HIGH,CRITICAL \
+                  --format table \
+                  "$IMAGE_NAME"
                 """
 
                 // JSON-Report speichern
                 sh """
                 docker run --rm \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                aquasec/trivy:latest image \
-                --format json \
-                "$IMAGE_NAME" > $WORKSPACE/trivy-report/trivy-report.json
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v $WORKSPACE:/workspace \
+                  aquasec/trivy:latest image \
+                  --format json \
+                  "$IMAGE_NAME" > /workspace/trivy-report/trivy-report.json
                 """
             }
         }
 
         stage('Trivy HTML Report') {
             steps {
-                // Zielordner anlegen
-                sh 'mkdir -p $WORKSPACE/trivy-report'
-
                 // HTML-Report mit eigenem Template bauen
                 sh """
                 docker run --rm \
-                -v /var/run/docker.sock:/var/run/docker.sock \
-                -v $WORKSPACE:/workspace \
-                -v $WORKSPACE/config/trivy:/contrib \
-                aquasec/trivy:latest image \
-                --format template \
-                --template /contrib/html.tpl \
-                -o /workspace/trivy-report/trivy-report.html \
-                $IMAGE_NAME
+                  -v /var/run/docker.sock:/var/run/docker.sock \
+                  -v $WORKSPACE:/workspace \
+                  -v $WORKSPACE/config/trivy:/contrib \
+                  aquasec/trivy:latest image \
+                  --format template \
+                  --template /contrib/html.tpl \
+                  -o /workspace/trivy-report/trivy-report.html \
+                  $IMAGE_NAME
                 """
 
                 // Check ob HTML-File da ist
-                sh 'ls -l $WORKSPACE/trivy-report || echo "⚠️ Trivy Reports fehlen!"'
+                sh 'ls -l trivy-report || echo "⚠️ Trivy Reports fehlen!"'
             }
         }
-
-
 
         stage('Deploy New Version (Blue or Green)') {
             steps {
