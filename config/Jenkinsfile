@@ -73,21 +73,19 @@ pipeline {
             steps {
                 sh """
                 docker run --rm \
-                --entrypoint /bin/sh \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
-                aquasec/trivy:latest -c '
-                    mkdir -p /workspace/trivy-report &&
-                    trivy image --format template \
-                    --template "@contrib/html.tpl" \
-                    -o /workspace/trivy-report/trivy-report.html \
-                    $IMAGE_NAME
-                '
+                aquasec/trivy:latest image \
+                --format template \
+                --template /workspace/config/trivy/html.tpl \
+                -o /workspace/trivy-report/trivy-report.html \
+                $IMAGE_NAME
                 """
 
                 sh 'ls -l trivy-report || echo "⚠️ Trivy Reports fehlen!"'
             }
         }
+
 
 
 
