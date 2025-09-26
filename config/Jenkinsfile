@@ -71,18 +71,19 @@ pipeline {
 
         stage('Trivy HTML Report') {
             steps {
-                sh 'mkdir -p trivy-report'
+                sh 'mkdir -p trivy-report'   // Host-Seite (Jenkins-Workspace)
 
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
                 -v $WORKSPACE:/workspace \
                 -v $WORKSPACE/config/trivy:/contrib \
-                aquasec/trivy:latest image \
-                --format template \
-                --template /contrib/html.tpl \
-                -o /workspace/trivy-report/trivy-report.html \
-                $IMAGE_NAME
+                aquasec/trivy:latest \
+                bash -c "mkdir -p /workspace/trivy-report && trivy image \
+                    --format template \
+                    --template /contrib/html.tpl \
+                    -o /workspace/trivy-report/trivy-report.html \
+                    $IMAGE_NAME"
                 """
 
                 sh 'ls -l trivy-report || echo "⚠️ Trivy Reports fehlen!"'
