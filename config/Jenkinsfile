@@ -138,10 +138,10 @@ pipeline {
             archiveArtifacts artifacts: 'trivy-report.*', fingerprint: true, allowEmptyArchive: true
 
             publishHTML(target: [
-                allowMissing: false,
+                allowMissing: true,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: "${WORKSPACE}",
+                reportDir: '.',
                 reportFiles: 'trivy-report.html',
                 reportName: 'Trivy Security Report'
             ])
@@ -153,5 +153,4 @@ pipeline {
             echo "❌ Deployment fehlgeschlagen - bitte Logs prüfen!"
         }
     }
-
 }
