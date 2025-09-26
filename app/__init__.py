@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_FILE = os.path.join(os.path.dirname(BASE_DIR), "data", "todos.db")
 os.makedirs(os.path.dirname(DB_FILE), exist_ok=True)
 # os.makedirs("data", exist_ok=True)
-# DB_FILE = "data/todos.db"
+# DB_FILE = "data/tod os.db"
 
 
 def get_connection():
