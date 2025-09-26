@@ -71,6 +71,9 @@ pipeline {
 
         stage('Trivy HTML Report') {
             steps {
+                // Zielordner anlegen
+                sh 'mkdir -p $WORKSPACE/trivy-report'
+
                 // HTML-Report mit eigenem Template bauen
                 sh """
                 docker run --rm \
@@ -88,6 +91,7 @@ pipeline {
                 sh 'ls -l $WORKSPACE/trivy-report || echo "⚠️ Trivy Reports fehlen!"'
             }
         }
+
 
 
         stage('Deploy New Version (Blue or Green)') {
