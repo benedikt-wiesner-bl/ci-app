@@ -46,7 +46,6 @@ pipeline {
             steps {
                 sh 'rm -rf trivy-report && mkdir -p trivy-report'
 
-                // Tabellen-Report nur in die Console
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -57,7 +56,6 @@ pipeline {
                 "$IMAGE_NAME"
                 """
 
-                // HTML-Report speichern (Template aus deinem Repo)
                 sh """
                 docker run --rm \
                 -v /var/run/docker.sock:/var/run/docker.sock \
@@ -69,8 +67,6 @@ pipeline {
                 -o /workspace/trivy-report/trivy-report.html \
                 $IMAGE_NAME || true
                 """
-
-                // Falls nichts erzeugt wurde, Dummy-Datei anlegen
                 sh 'test -f trivy-report/trivy-report.html || echo "<html><body><h2>No vulnerabilities found</h2></body></html>" > trivy-report/trivy-report.html'
 
                 sh 'ls -l trivy-report'
@@ -125,7 +121,7 @@ pipeline {
         stage('Cleanup Old') {
             steps {
                 script {
-                    echo "Alte Version bleibt erstmal aktiv für Rollback."
+                    echo "Auto Skip für Rollback."
                 }
             }
         }
@@ -149,7 +145,7 @@ pipeline {
             echo "✅ Blue-Green Deployment erfolgreich!"
         }
         failure {
-            echo "❌ Deployment fehlgeschlagen - bitte Logs prüfen!"
+            echo "❌ Deployment fehlgeschlagen!"
         }
     }
 }
