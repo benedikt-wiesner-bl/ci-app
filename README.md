@@ -30,6 +30,12 @@ Everything runs via **Docker** and **docker compose** on your local machine.
 
 - **UI Convenience**
   Your ToDo app includes footer links to all services → no more port hunting.
+---
+
+## Security Reports
+
+Trivy generates HTML reports during the Jenkins pipeline.
+Reports are stored in the Jenkins workspace under `trivy-report/` and published in the Jenkins UI.
 
 ---
 
@@ -149,9 +155,3 @@ ci-app/
 │── requirements.txt
 ```
 
----
-
-## Security Reports
-
-Trivy generates HTML reports during the Jenkins pipeline.
-Reports are stored in the Jenkins workspace under `trivy-report/` and published in the Jenkins UI.
