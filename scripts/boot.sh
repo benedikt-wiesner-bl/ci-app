@@ -26,6 +26,7 @@ start_docker() {
 compose_up() {
   echo -e "${GREEN}Starting docker compose...${RESET}"
   docker compose -f "$DOCKER_COMPOSE_FILE" up -d
+  echo -e "${GREEN}http://localhost:8085/ (ToDo App and links)${RESET}"
 }
 
 compose_build() {
