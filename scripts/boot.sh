@@ -14,7 +14,7 @@ usage() {
   echo -e "Usage: $0 [-start] [-stop] [-build] [-h|--help]\n"
   echo "  -start   Starts Docker and starts docker compose"
   echo "  -stop    Stops docker compose"
-  echo "  -build   Starts Docker and build docker compose new (DO ON FIRST USAGE)"
+  echo "  -build   Starts Docker and build docker compose new (DO IF FIRST TIME)"
   exit 1
 }
 
