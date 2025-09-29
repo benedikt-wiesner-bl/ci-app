@@ -1,19 +1,19 @@
 # ci-app
 
 A lightweight **CI/CD and monitoring lab** with Jenkins, a ToDo app (Python/Flask), Prometheus, Grafana, cAdvisor, Dozzle – and integrated **security scanning with Trivy**.
-Everything runs via `Docker` and `docker compose` on your local machine.
+Everything runs via **Docker** and **docker compose** on your local machine.
 
 ---
 
 ## Features
 
 - **CI/CD with Jenkins**
-  Use Jenkins with a `Jenkinsfile` to automatically build, test, and perform **blue-green deployments** of your app.
+  Use Jenkins with a `Jenkinsfile` to automatically build, test, and perform **blue‑green deployments** of your app.
 
 - **Python ToDo App**
   Small Flask application with SQLite as an example project.
   - Runs internally as two containers (`ci-app-blue` and `ci-app-green`)
-  - Jenkins switches between both versions via Nginx → **zero-downtime deployment**
+  - Jenkins switches between both versions via Nginx → **zero‑downtime deployment**
 
 - **Monitoring & Logging**
   - `Prometheus` collects metrics
@@ -52,6 +52,8 @@ cd ci-app
 
 2. **Start Services**
 
+Using docker compose directly:
+
 ```bash
 docker compose -f config/docker-compose.yml up --build -d
 ```
@@ -59,19 +61,27 @@ docker compose -f config/docker-compose.yml up --build -d
 This builds the images and starts all services in the background.
 On first start, Jenkins may take a few minutes.
 
+**—or—** use the provided helper script (especially handy on WSL):
+
+```bash
+./scripts/boot.sh -build   # first time: starts Docker service and builds/starts all services
+./scripts/boot.sh -start   # subsequent starts
+./scripts/boot.sh -stop    # stop all services
+```
+
 3. **Access Services in Browser**
 
-- **ToDo App (via Nginx)** → [http://localhost:8085](http://localhost:8085)
-- **Jenkins** → [http://localhost:8080](http://localhost:8080)
-  - Initial admin password:
-    ```bash
-    docker logs jenkins | grep "initialAdminPassword"
-    ```
-- **Grafana** → [http://localhost:3000](http://localhost:3000)
+- **ToDo App (via Nginx)** → <http://localhost:8085>
+- **Jenkins** → <http://localhost:8080>
+  Initial admin password:
+  ```bash
+  docker logs jenkins | grep "initialAdminPassword"
+  ```
+- **Grafana** → <http://localhost:3000>
   Login: `admin` / `admin` (change password on first login)
-- **Prometheus** → [http://localhost:9090](http://localhost:9090)
-- **cAdvisor** → [http://localhost:8081](http://localhost:8081)
-- **Dozzle (Logs)** → [http://localhost:9999](http://localhost:9999)
+- **Prometheus** → <http://localhost:9090>
+- **cAdvisor** → <http://localhost:8081>
+- **Dozzle (Logs)** → <http://localhost:9999>
 
 ---
 
@@ -79,44 +89,28 @@ On first start, Jenkins may take a few minutes.
 
 For the pipeline to run, the following plugins must be installed in Jenkins:
 
--**Pipeline** (Workflow: Aggregator)
--**Pipeline:** GitHub / Git (for `git` checkout with credentials)
--**Docker Pipeline** (for `docker build`, `docker run`, `docker.withRegistry`, etc.)
--**HTML Publisher Plugin** (for `publishHTML`)
--**Credentials Binding Plugin** (to integrate SSH key / GitHub key)
--**AnsiColor Plugin** (optional, for colored console logs)
+- **Pipeline** (Workflow: Aggregator)
+- **Pipeline: Git** / **GitHub** (for `git` checkout with credentials)
+- **Docker Pipeline** (for `docker build`, `docker run`, `docker.withRegistry`, etc.)
+- **HTML Publisher** (for `publishHTML`)
+- **Credentials Binding** (to integrate SSH key / GitHub key)
+- **AnsiColor** (optional, colored console logs)
 
 Installation:
-- In Jenkins → `Manage Jenkin`s → `Plugin`s → `Available plugins` → search & install
-- Then restart
-
+In Jenkins → **Manage Jenkins** → **Plugins** → **Available plugins** → search & install → restart Jenkins.
 
 ---
 
-## CI/CD with Blue-Green & Security Scan
+## CI/CD with Blue‑Green & Security Scan
 
 Your `Jenkinsfile` contains several stages:
 
-1. **Checkout**
-   Clones the GitHub repository.
-
-2. **Code Quality**
-   Runs `flake8` linting.
-
-3. **Build**
-   Builds the Python ToDo app as a Docker image.
-
-4. **Test**
-   Runs unit tests with `pytest`.
-
-5. **Security Scan (Trivy)**
-   Scans the built Docker image and dependencies.
-   Generates an **HTML security report**.
-
-6. **Deploy (Blue-Green)**
-   - Jenkins deploys the new version into an inactive container (`blue` or `green`).
-   - Runs a healthcheck (`/health`).
-   - Switches Nginx to the new version → the old version remains available for rollback.
+1. **Checkout** – Clones the GitHub repository.
+2. **Code Quality** – Runs `flake8` linting.
+3. **Build** – Builds the Python ToDo app as a Docker image.
+4. **Test** – Runs unit tests with `pytest`.
+5. **Security Scan (Trivy)** – Scans the built Docker image and dependencies; generates an **HTML security report**.
+6. **Deploy (Blue‑Green)** – Deploys into the inactive container (`blue` or `green`), runs a `/health` check, then switches Nginx to the new version → enabling quick rollback.
 
 ---
 
@@ -130,7 +124,7 @@ pip install -r requirements.txt
 python __init__.py
 ```
 
-→ then it runs on [http://localhost:5000](http://localhost:5000) (local only, without Nginx).
+Then open <http://localhost:5000> (local only, without Nginx).
 
 ---
 
