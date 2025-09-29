@@ -42,7 +42,7 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan (HTML Only)') {
+        stage('Trivy Scan') {
             steps {
                 sh 'rm -rf trivy-report && mkdir -p trivy-report'
 
